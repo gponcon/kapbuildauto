@@ -1,3 +1,5 @@
-# A Google Earth to OpenCPN script
+# Satellite images to kap files conversion
 
-This script uses google earth (specific releases...), imagick, tesseract, scrot, xautomation.
+This script convert google earth or viking images to kap files using imgkap, imagick, tesseract, scrot and xautomation.
+
+TODO: merge scripts + configuration file

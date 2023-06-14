@@ -5,9 +5,7 @@
 CHARTSDIR='/opt/charts/imgkap/'
 TMPFILE='/tmp/kapbuild.png'
 TMPOCRFILE='/tmp/tesser'
-#OCRCONVPARAMS='-modulate 100,0,100 -brightness-contrast -30x80 -negate '
 OCRCONVPARAMS='-modulate 100,0,100 -brightness-contrast 0x90 -negate '
-#ALLCOORD='258x25+363+1047'
 ALLCOORD='400x25+300+1047'
 TRFR='S'
 TRTO='5'
@@ -19,8 +17,6 @@ YCADRE=944 # 1016-72
 COORDSUBPATTERN='\([0-9°,'"'"']*\)"'
 NSPATTERN='s/.*[NS]'$COORDSUBPATTERN'.*/\1/'
 EWPATTERN='s/.*[EW]'$COORDSUBPATTERN'.*/\1/'
-
-#sleep 1
 
 displayerror()
 {
@@ -48,11 +44,11 @@ do
   IMGNAME=$IMGPREFIX`printf "%'03d" $CPT`
 done
 
-# Déplacement haut gauche
+# Move on left-top of the screen
 xte 'mousemove '$XCOR' '$YCOR
 sleep .1
 
-# Extraction coordonnées
+# Coords extraction
 scrot -z -c -o $TMPFILE
 convert $TMPFILE $OCRCONVPARAMS -crop $ALLCOORD -resize 700x500 $TMPFILE'1.pnm'
 tesseract $TMPFILE'1.pnm' $TMPOCRFILE > /dev/null 2> /dev/null
@@ -61,7 +57,7 @@ COORDS=`head -n 1 $TMPOCRFILE'.txt' | tr $TRFR $TRTO`
 XLAT=`echo $COORDS | sed 's/ //g' | sed $NSPATTERN`'N'
 XLONG=`echo $COORDS | sed 's/ //g' | sed $EWPATTERN`'W'
 
-# Déplacement bas droit
+# Move on bottom right
 xte 'mousermove '$XCADRE' '$YCADRE
 sleep .1
 
@@ -73,14 +69,14 @@ COORDS=`head -n 1 $TMPOCRFILE'.txt' | tr $TRFR $TRTO`
 YLAT=`echo $COORDS | sed 's/ //g' | sed $NSPATTERN`'N'
 YLONG=`echo $COORDS | sed 's/ //g' | sed $EWPATTERN`'W'
 
-PT1='Point 1 : '$XLAT' x '$XLONG
-PT2='Point 2 : '$YLAT' x '$YLONG
+PT1='Point 1: '$XLAT' x '$XLONG
+PT2='Point 2: '$YLAT' x '$YLONG
 #displayinfo "$PT1 $PT2"
 
-# Extraction image
+# Image extraction
 convert -crop $XCADRE'x'$YCADRE'+'$XCOR'+'$YCOR -quality 97 $TMPFILE $IMGNAME'.jpg'
 
-# Création du KAP
+# KAP file build
 ~/bin/imgkap $IMGNAME'.jpg' "$XLAT" "$XLONG" "$YLAT" "$YLONG" $IMGNAME'.kap'
 
 if [ $? != 0 ] ;then
@@ -89,7 +85,7 @@ if [ $? != 0 ] ;then
   displayerror "Echec de la conversion kap\n\n$PT1\n$PT2"
 fi
 
-# Size check
+# Sizes checks
 JPGSIZE=`ls -s $IMGNAME'.jpg' | cut -d ' ' -f 1`
 KAPSIZE=`ls -s $IMGNAME'.kap' | cut -d ' ' -f 1`
 if [ $KAPSIZE < $JPGSIZE ] ;then
@@ -103,6 +99,4 @@ if [ $KAPSIZE < 100 ] ;then
   displayerror "Kap file size too small (${KAPSIZE}kb)"
 fi
 
-MSG=$PT1"\n"$PT2"\nI: "$IMGNAME'.kap'
-
-displayinfo $MSG
+displayinfo $PT1"\n"$PT2"\nI: "$IMGNAME'.kap'

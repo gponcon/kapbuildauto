@@ -7,13 +7,13 @@ TMPFILE='/tmp/kapbuild.png'
 TMPOCRFILE='/tmp/tesser'
 OCRCONVPARAMS='-modulate 100,0,100 -brightness-contrast 0x90 -negate '
 ALLCOORD='400x25+300+1047'
-TRFR='S'
-TRTO='5'
+TRFR="\nS"
+TRTO=' 5'
 GOCROPT="-l 200 "
 XCOR=0
-YCOR=72
+YCOR=41
 XCADRE=1920
-YCADRE=944 # 1016-72
+YCADRE=975 # 1016-41
 COORDSUBPATTERN='\([0-9°,'"'"']*\)"'
 NSPATTERN='s/.*[NS]'$COORDSUBPATTERN'.*/\1/'
 EWPATTERN='s/.*[EW]'$COORDSUBPATTERN'.*/\1/'
@@ -37,11 +37,11 @@ fi
 CPT=1
 IMGPREFIX=$CHARTSDIR`head -n 1 ~/.kapbuildauto`'-'
 
-IMGNAME=$IMGPREFIX`printf "%'03d" $CPT`
+IMGNAME=$IMGPREFIX`printf "%'05d" $CPT`
 while [ -f $IMGNAME'.kap' ]
 do
   CPT=`expr $CPT + 1`
-  IMGNAME=$IMGPREFIX`printf "%'03d" $CPT`
+  IMGNAME=$IMGPREFIX`printf "%'05d" $CPT`
 done
 
 # Move on left-top of the screen
@@ -52,7 +52,7 @@ sleep .1
 scrot -z -c -o $TMPFILE
 convert $TMPFILE $OCRCONVPARAMS -crop $ALLCOORD -resize 700x500 $TMPFILE'1.pnm'
 tesseract $TMPFILE'1.pnm' $TMPOCRFILE > /dev/null 2> /dev/null
-COORDS=`head -n 1 $TMPOCRFILE'.txt' | tr $TRFR $TRTO`
+COORDS=`cat $TMPOCRFILE'.txt' | tr $TRFR $TRTO`
 #displayinfo "Extract1 : $COORDS"
 XLAT=`echo $COORDS | sed 's/ //g' | sed $NSPATTERN`'N'
 XLONG=`echo $COORDS | sed 's/ //g' | sed $EWPATTERN`'W'
@@ -64,7 +64,7 @@ sleep .1
 scrot -z -c -o $TMPFILE
 convert $TMPFILE $OCRCONVPARAMS -crop $ALLCOORD -resize 700x500 $TMPFILE'2.pnm'
 tesseract $TMPFILE'2.pnm' $TMPOCRFILE > /dev/null 2> /dev/null
-COORDS=`head -n 1 $TMPOCRFILE'.txt' | tr $TRFR $TRTO`
+COORDS=`cat $TMPOCRFILE'.txt' | tr $TRFR $TRTO`
 #displayinfo "'Extract2 : '$COORDS"
 YLAT=`echo $COORDS | sed 's/ //g' | sed $NSPATTERN`'N'
 YLONG=`echo $COORDS | sed 's/ //g' | sed $EWPATTERN`'W'
